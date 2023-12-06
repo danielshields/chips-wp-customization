@@ -1,7 +1,7 @@
 <?php
 /*
 Plugin Name: CHIPS Wordpress Customization
-Description: A plugin to for basic Wordpress customizations for CHIPS
+Description: A plugin for common CHIPS Wordpress customizations
 Version: 1.0
 Author: Dan Shields
 */
