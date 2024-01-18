@@ -27,7 +27,8 @@ function chips_wp_custom_mce_before_init( $settings ) {
 					if($formatOptions[3] === 'block'){
 						$fArray[$formatOptions[3]] = 'div';
 					} else {
-						$fArray[$formatOptions[3]] = $formatOptions[3];
+						// $fArray[$formatOptions[3]] = $formatOptions[3];
+						$fArray[$formatOptions[3]] = 'span';
 					}
 				}
 				

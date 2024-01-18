@@ -2,7 +2,7 @@
 /*
 Plugin Name: CHIPS Wordpress Customization
 Description: A plugin for common CHIPS Wordpress customizations
-Version: 1.0
+Version: 1.1
 Author: Dan Shields
 */
 
@@ -53,6 +53,18 @@ function ciu_settings_page() {
 	<form action="<?php 
 		echo esc_url(admin_url('admin-post.php'));
 	?>" method="post">
+		<fieldset>
+			<label for="chips_wp_custom_add_menus">Add Menus to Appearance</label>
+			<input type="checkbox" name="chips_wp_custom_add_menus" id="chips_wp_custom_add_menus" value="1" <?php echo (get_option('chips_wp_custom_add_menus') == 1 ? 'checked' : ''); ?> />
+		</fieldset>
+		<fieldset>
+			<label for="chips_wp_custom_add_thumbnails">Add Featured Image support</label>
+			<input type="checkbox" name="chips_wp_custom_add_thumbnails" id="chips_wp_custom_add_thumbnails" value="1" <?php echo (get_option('chips_wp_custom_add_thumbnails') == 1 ? 'checked' : ''); ?> />
+		</fieldset>
+		<fieldset>
+			<label for="chips_wp_custom_add_pageexcerpts">Add Excerpts to Pages</label>
+			<input type="checkbox" name="chips_wp_custom_add_pageexcerpts" id="chips_wp_custom_add_pageexcerpts" value="1" <?php echo (get_option('chips_wp_custom_add_pageexcerpts') == 1 ? 'checked' : ''); ?> />
+		</fieldset>
 		<fieldset>
 			<label for="chips_wp_custom_remove_emojis">Remove Emojis</label>
 			<input type="checkbox" name="chips_wp_custom_remove_emojis" id="chips_wp_custom_remove_emojis" value="1" <?php echo (get_option('chips_wp_custom_remove_emojis') == 1 ? 'checked' : ''); ?> />
@@ -109,6 +121,16 @@ function ciu_settings_page() {
 			<input type="checkbox" name="chips_wp_custom_remove_howdy" id="chips_wp_custom_remove_howdy" value="1" <?php echo (get_option('chips_wp_custom_remove_howdy') == 1 ? 'checked' : ''); ?> />
 		</fieldset>
 		<fieldset>
+			<label for="chips_wp_add_text_format_acf">Add ACF field type to format text</label>
+			<input type="checkbox" name="chips_wp_add_text_format_acf" id="chips_wp_add_text_format_acf" value="1" <?php echo (get_option('chips_wp_add_text_format_acf') == 1 ? 'checked' : ''); ?> />
+			Select text to reveal formatting options
+		</fieldset>
+		<fieldset>
+			<label for="chips_wp_media_caption_formatting">Media: Add formatted caption field</label>
+			<input type="checkbox" name="chips_wp_media_caption_formatting" id="chips_wp_media_caption_formatting" value="1" <?php echo (get_option('chips_wp_media_caption_formatting') == 1 ? 'checked' : ''); ?> />
+			<code>&lt;?php echo get_field("chips_media_caption");?&gt;</code> in your template
+		</fieldset>
+		<fieldset>
 			<label for="chips_wp_custom_rte_formats">
 				Custom RTE Formats
 				<br><br>
@@ -116,10 +138,19 @@ function ciu_settings_page() {
 					Format: Title|class|selector|block/inline|wrap<br>
 					Jumbo|jumbo||block|wrap<br>
 					Button with arrow|button-w-arrow|a|inline
-				</small>
+				</small><br><br>
+				<small>Style these formats in a <br><code style="font-size:100%;">chips-editor-styles.css</code> <br>file in your theme's root folder.</small>
 			</label>
 			<textarea name="chips_wp_custom_rte_formats" id="chips_wp_custom_rte_formats"><?php echo get_option('chips_wp_custom_rte_formats'); ?></textarea>
 		</fieldset>
+		<!-- <fieldset>
+			<label for="chips_wp_custom_editor_css">
+				Admin-only editor CSS<br><br>
+				<small>Useful for styling text formats from previous field</small>
+			</label>
+			<textarea disabled name="chips_wp_custom_editor_css" id="chips_wp_custom_editor_css"><?php echo get_option('chips_wp_custom_editor_css'); ?></textarea>
+			Don't use this field. Add your CSS to a file called 'chips-editor-styles.css'
+		</fieldset> -->
 		<input class="settings-save" type="submit" name="submit" value="Save Changes" />
 	</form>
 
@@ -133,6 +164,22 @@ function chips_wp_custom_settings_handler() {
 	if (!current_user_can('manage_options')) {
 		wp_die('You do not have sufficient permissions to access this page.');
 	}
+	if (isset($_POST['chips_wp_custom_add_menus'])) {
+		update_option('chips_wp_custom_add_menus', $_POST['chips_wp_custom_add_menus']);
+	} else {
+		update_option('chips_wp_custom_add_menus', 0);
+	}
+	if (isset($_POST['chips_wp_custom_add_thumbnails'])) {
+		update_option('chips_wp_custom_add_thumbnails', $_POST['chips_wp_custom_add_thumbnails']);
+	} else {
+		update_option('chips_wp_custom_add_thumbnails', 0);
+	}
+	if (isset($_POST['chips_wp_custom_add_pageexcerpts'])) {
+		update_option('chips_wp_custom_add_pageexcerpts', $_POST['chips_wp_custom_add_pageexcerpts']);
+	} else {
+		update_option('chips_wp_custom_add_pageexcerpts', 0);
+	}
+
 	if (isset($_POST['chips_wp_custom_remove_emojis'])) {
 		update_option('chips_wp_custom_remove_emojis', $_POST['chips_wp_custom_remove_emojis']);
 	} else {
@@ -178,6 +225,9 @@ function chips_wp_custom_settings_handler() {
 	if(isset($_POST['chips_wp_custom_rte_formats'])) {
 		update_option('chips_wp_custom_rte_formats', $_POST['chips_wp_custom_rte_formats']);
 	}
+	if(isset($_POST['chips_wp_custom_editor_css'])) {
+		update_option('chips_wp_custom_editor_css', $_POST['chips_wp_custom_editor_css']);
+	}
 	if(isset($_POST['chips_wp_custom_login_css'])) {
 		update_option('chips_wp_custom_login_css', $_POST['chips_wp_custom_login_css']);
 	}
@@ -202,6 +252,18 @@ function chips_wp_custom_settings_handler() {
 	} else {
 		update_option('chips_wp_custom_remove_howdy', 0);
 	}
+	
+	if(isset($_POST['chips_wp_add_text_format_acf'])) {
+		update_option('chips_wp_add_text_format_acf', $_POST['chips_wp_add_text_format_acf']);
+	} else {
+		update_option('chips_wp_add_text_format_acf', 0);
+	}
+	
+	if(isset($_POST['chips_wp_media_caption_formatting'])) {
+		update_option('chips_wp_media_caption_formatting', $_POST['chips_wp_media_caption_formatting']);
+	} else {
+		update_option('chips_wp_media_caption_formatting', 0);
+	}
 
 	wp_redirect($_SERVER['HTTP_REFERER']);
 	exit;
@@ -212,6 +274,20 @@ if (get_option('chips_wp_custom_remove_emojis') == 1) {
 	remove_action('wp_head', 'print_emoji_detection_script', 7);
 	remove_action('wp_print_styles', 'print_emoji_styles');
 }
+if (get_option('chips_wp_custom_add_menus') == 1) {
+	add_theme_support('menus');
+	// register_nav_menus(array(
+	// 	'header-menu' => 'Header Menu',
+	// 	'footer-menu' => 'Footer Menu'
+	// ));
+}
+if (get_option('chips_wp_custom_add_thumbnails') == 1) {
+	add_theme_support('post-thumbnails');
+}
+if (get_option('chips_wp_custom_add_pageexcerpts') == 1) {
+	add_post_type_support('page', 'excerpt');
+}	
+
 if (get_option('chips_wp_custom_remove_wp_version') == 1) {
 	remove_action('wp_head', 'wp_generator');
 }
@@ -265,6 +341,7 @@ function chips_wp_custom_move_scripts_to_footer() {
 
 require_once('components/_rte.php');
 require_once('components/_login.php');
+require_once('components/_acf.php');
 
 if(get_option('chips_wp_custom_hide_imgs_from_search')){
 	add_action('init', 'chips_wp_custom_hide_imgs_from_search');
@@ -312,12 +389,34 @@ if(get_option('chips_wp_custom_remove_howdy')){
 }
 function change_howdy($translated, $text, $domain){
 	if (!is_admin() || 'default' != $domain)
-		return $translated;
-
-	if (false !== strpos($translated, 'Howdy'))
-		return str_replace('Howdy, ', '', $translated);
-
 	return $translated;
+
+if (false !== strpos($translated, 'Howdy'))
+return str_replace('Howdy, ', '', $translated);
+
+return $translated;
+}
+
+if(get_option('chips_wp_add_text_format_acf')){
+	add_action('acf/include_field_types', function() {
+		new chips_custom_acf_textfield();
+	});
+
+	add_action('acf/input/admin_enqueue_scripts', function() {
+		wp_enqueue_style('chips-custom-acf-textfield_CSS', plugins_url('vendor/suneditor.min.css', __FILE__), array(), '1.0', 'all');
+		wp_enqueue_script('chips-custom-acf-textfield_Lang', plugins_url('vendor/en.js', __FILE__), array('acf-input'), '1.0', true);
+		wp_enqueue_script('chips-custom-acf-textfield_Vendor', plugins_url('vendor/suneditor.min.js', __FILE__), array('acf-input'), '1.0', true);
+		wp_enqueue_script('chips-custom-acf-textfield_CHIPS', plugins_url('components/_acf.js', __FILE__), array('acf-input'), '1.0', true);
+	});
+}
+
+if(get_option('chips_wp_media_caption_formatting')){
+	if(!get_option('chips_wp_add_text_format_acf')){
+		echo "The Media: Add formatted caption field option requires the Add ACF field type to format text option to be enabled.";
+	} else {
+		// add a field group to the attachment page for image types
+		add_action('acf/init', 'chips_wp_media_caption_formatting');
+	}
 }
 
 if (get_option('chips_wp_custom_remove_legacy_block_styles') == 1) {
@@ -327,4 +426,23 @@ if (get_option('chips_wp_custom_remove_legacy_block_styles') == 1) {
 function chips_wp_custom_deregister_styles() {
 	wp_dequeue_style( 'global-styles' );
 	wp_dequeue_style( 'classic-theme-styles' );
+}
+
+
+// if option chips_wp_custom_editor_css has a value and it's not blank, add it to the admin editor
+// if(get_option('chips_wp_custom_editor_css') && get_option('chips_wp_custom_editor_css') != ''){
+	add_action('admin_head', 'chips_wp_custom_editor_css');
+// }
+
+function chips_wp_custom_editor_css() {
+	// echo '<style>' . get_option('chips_wp_custom_editor_css') . '</style>';
+	// echo '<style>iframe#content_ifr { ' . get_option('chips_wp_custom_editor_css') . ' }</style>';
+
+	// add_editor_style with inline <style> tag
+	// add_editor_style('<style>' . get_option('chips_wp_custom_editor_css') . '</style>');
+
+	// if chips-editor-styles.css exists in the theme directory, add it to the editor
+	if(file_exists(get_template_directory() . '/chips-editor-styles.css')){
+		add_editor_style(array('chips-editor-styles.css'));
+	}
 }
